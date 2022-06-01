@@ -10,7 +10,7 @@ namespace PZ2_MSG_Decoder
     {
         static void Main(string[] args)
         {
-            string file = @"D:\VietHoaGame\Fatal Frame 2 PS2\Text\3270";
+            string file = @"D:\VietHoaGame\Fatal Frame 2 PS2\Text-20766\3270";
             List<BlockText> blocks = Decoder.Decode(file);
             List<string> lines = new List<string>();
             for (int i = 0; i < blocks.Count; i++)
