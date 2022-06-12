@@ -90,7 +90,13 @@ namespace PZ2_MSG_Decoder
             using (BinaryWriter bw = new BinaryWriter(stream))
             {
                 bw.Write(new byte[blocks.Length * 4]);
-                
+                var blocksSorted = blocks.OrderBy(b => b.PointerOffset).ToArray();
+                for (int i = 0; i < blocksSorted.Lenghth; i++)
+                {
+                    blocksSorted[i].PointerOffset = bw.BaseStream.Position;
+                    bw.Write(new byte[blocksSorted[i].Messages.Count * 4]);
+                    
+                }
             }
         }
     }
