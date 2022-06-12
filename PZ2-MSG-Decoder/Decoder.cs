@@ -73,5 +73,25 @@ namespace PZ2_MSG_Decoder
                 return blocks;
             }
         }
+        public static byte[] Encode(string input, string txt, string output) 
+        {
+            List<BlockText> blocks = Decode(input);
+            string[] text = File.ReadAllLines(txt);
+            int index = 0;
+            for (int i = 0; i < blocks.Length; i++) 
+            {
+                for (int x = 0; x < blocks[i].Messages.Length; x++)
+                {
+                    if (index < text.Length - 1) blocks[i].Messages[x] = text[index++];
+
+                }
+            }
+            MemoryStream stream = new MemoryStream();
+            using (BinaryWriter bw = new BinaryWriter(stream))
+            {
+                bw.Write(new byte[blocks.Length * 4]);
+                
+            }
+        }
     }
 }
