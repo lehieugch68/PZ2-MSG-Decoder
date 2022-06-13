@@ -58,7 +58,7 @@ namespace PZ2_MSG_Decoder
                         for (int y = 0; y < strs.Length; y++)
                         {
                             string temp = string.Empty;
-                            if (CustomEncoding.Original.TryGetValue(encoded[y], out temp)) strs[y] = temp;
+                            if (CustomEncoding.Page0.TryGetValue(encoded[y], out temp)) strs[y] = temp;
                             else strs[y] = "{" + encoded[y].ToString() + "}";
                         }
                         string str = string.Join("", strs);
@@ -73,17 +73,16 @@ namespace PZ2_MSG_Decoder
                 return blocks;
             }
         }
-        public static byte[] Encode(string input, string txt, string output) 
+        public static byte[] Encode(string input, string txt) 
         {
-            List<BlockText> blocks = Decode(input);
+            BlockText[] blocks = Decode(input).ToArray();
             string[] text = File.ReadAllLines(txt);
             int index = 0;
             for (int i = 0; i < blocks.Length; i++) 
             {
                 for (int x = 0; x < blocks[i].Messages.Length; x++)
                 {
-                    if (index < text.Length - 1) blocks[i].Messages[x] = text[index++];
-
+                    if (index < text.Length - 1) blocks[i].Messages[x].Value = text[index++];
                 }
             }
             MemoryStream stream = new MemoryStream();
@@ -91,13 +90,65 @@ namespace PZ2_MSG_Decoder
             {
                 bw.Write(new byte[blocks.Length * 4]);
                 var blocksSorted = blocks.OrderBy(b => b.PointerOffset).ToArray();
-                for (int i = 0; i < blocksSorted.Lenghth; i++)
+                for (int i = 0; i < blocksSorted.Length; i++)
                 {
                     blocksSorted[i].PointerOffset = bw.BaseStream.Position;
-                    bw.Write(new byte[blocksSorted[i].Messages.Count * 4]);
-                    
+                    bw.Write(new byte[blocksSorted[i].Messages.Length * 4]);
+                    for (int x = 0; x < blocksSorted[i].Messages.Length; x++)
+                    {
+                        blocksSorted[i].Messages[x].Pointer = bw.BaseStream.Position;
+                        byte[] bytes = EncodeText(blocksSorted[i].Messages[x].Value);
+                        bw.Write(bytes);
+                    }
+                    bw.BaseStream.Position = blocksSorted[i].PointerOffset;
+                    for (int x = 0; x < blocksSorted[i].Messages.Length; x++)
+                    {
+                        bw.Write((int)blocksSorted[i].Messages[x].Pointer);
+                    }
+                    bw.BaseStream.Position = bw.BaseStream.Length;
+                }
+                bw.BaseStream.Position = 0;
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    bw.Write((int)blocks[i].PointerOffset);
                 }
             }
+            return stream.ToArray();
+        }
+        private static byte[] EncodeText(string input)
+        {
+            foreach (var code in CustomEncoding.Code)
+            {
+                input = input.Replace(code.Value, code.Key);
+            }
+            char[] chars = input.ToCharArray();
+            List<byte> bytes = new List<byte>();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] != '{')
+                {
+                    foreach (var encoding in CustomEncoding.Page0)
+                    {
+                        if (encoding.Value == chars[i].ToString())
+                        {
+                            bytes.Add(encoding.Key);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    string dec = "";
+                    i++;
+                    while (chars[i] != '}')
+                    {
+                        dec += chars[i++];
+
+                    }
+                    bytes.Add((byte)int.Parse(dec));
+                }
+            }
+            return bytes.ToArray();
         }
     }
 }

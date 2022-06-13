@@ -9,7 +9,6 @@ namespace PZ2_MSG_Decoder
     {
         public int Index { get; set; }
         public long PointerOffset { get; set; }
-        public long NewPointerOffset { get; set; }
         public Message[] Messages { get; set; }
         public BlockText(int index, long pointerOffset)
         {

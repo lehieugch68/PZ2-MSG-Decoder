@@ -7,7 +7,8 @@ namespace PZ2_MSG_Decoder
 {
     internal class CustomEncoding
     {
-        public static Dictionary<byte, string> Original = new Dictionary<byte, string>()
+        #region En
+        public static Dictionary<byte, string> Page0 = new Dictionary<byte, string>()
         {
             { 0x5A, " " },
             { 0x1, "A" },
@@ -105,6 +106,13 @@ namespace PZ2_MSG_Decoder
             { 0x6F, "“" },
             { 0x5B, "”" },
         };
+        #endregion
+        #region Jp
+        public static Dictionary<byte, string> Page1 = new Dictionary<byte, string>()
+        {
+
+        };
+        #endregion
         public static Dictionary<string, string> Code = new Dictionary<string, string>()
         {
             { "{251}", "{Next}" },
@@ -124,5 +132,7 @@ namespace PZ2_MSG_Decoder
             { "{253}s", "{FD2D}" },
             { "{253}{0}", "{FD00}" },
         };
+
+
     }
 }
